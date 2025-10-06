@@ -205,3 +205,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files
+Icon?
+._*
+
+# Thumbnails
+._.DS_Store
+
+# macOS folder attributes
+.DS_Store?
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+alignment/
+classification/
+expectation/
+generation_dl/
+generation_EA/
