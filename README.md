@@ -36,7 +36,7 @@ For more detailed instructions, you can refer to the official [Conda documentati
 To create setup the environment, run the following commands in the terminal:
 
 ```bash
-git clone --recurse-submodules https://github.com/MusicalInformatics/miws2025.git
+git clone --recurse-submodules https://github.com/MusicalInformatics/miws25.git
 cd miws25
 conda env create -f environment.yml
 ```
@@ -44,7 +44,7 @@ conda env create -f environment.yml
 The command above requires `git` 2.13 or later, if you have an older version of `git`, you can use the following command instead.
 
 ```bash
-git clone --recursive https://github.com/MusicalInformatics/miws2024.git
+git clone --recursive https://github.com/MusicalInformatics/miws25.git
 cd miws25
 conda env create -f environment.yml
 ```
@@ -60,3 +60,7 @@ conda activate miws25
 ## Lecturers
 
 - Carlos Cancino-Chacón: [carlos.cancino_chacon@jku.at](mailto:carlos.cancino_chacon@jku.at)
+
+## License
+
+This repository is distributed under the MIT License.

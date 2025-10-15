@@ -15,10 +15,20 @@ from partitura.utils.synth import additive_synthesis, SAMPLE_RATE
 
 import IPython.display as ipd
 from ipywidgets import interactive, fixed
+import shutil, ctypes.util
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 MIDI_PITCH_FREQS = midi_pitch_to_frequency(np.arange(128))
 
+has_exec = shutil.which("fluidsynth") is not None
+has_lib = ctypes.util.find_library("fluidsynth") is not None
+
+if has_exec or has_lib:
+    # print("FluidSynth is installed.")
+    HAS_FLUIDSYNTH = True
+else:
+    # print("FluidSynth not found.")
+    HAS_FLUIDSYNTH = False
 
 class VerticalLineOnClickPlot(object):
     """
@@ -196,7 +206,11 @@ class InteractiveToneAnalyzer(VerticalLineOnClickPlot):
         spectrogram_dist = spectrogram.sum(axis=1)
         spectrogram_dist /= max(spectrogram_dist.sum(), 1e-10)
 
-        fig, axes = plt.subplots(nrows=1, ncols=2, figsize=figsize,)
+        fig, axes = plt.subplots(
+            nrows=1,
+            ncols=2,
+            figsize=figsize,
+        )
         super().__init__(
             x=freqs,
             y=spectrogram_dist,
@@ -258,13 +272,19 @@ class InteractiveToneAnalyzer(VerticalLineOnClickPlot):
             element_id="audio_display",
         )
         self.signal_ax.cla()
-        self.signal_ax.plot(self.signal[1000:2000] / abs(self.signal).max(), color="firebrick", label="Piano",)
-        self.signal_ax.plot(audio_signal[1000:2000] / abs(audio_signal).max(), color="black", label="synthesized")
+        self.signal_ax.plot(
+            self.signal[1000:2000] / abs(self.signal).max(),
+            color="firebrick",
+            label="Piano",
+        )
+        self.signal_ax.plot(
+            audio_signal[1000:2000] / abs(audio_signal).max(),
+            color="black",
+            label="synthesized",
+        )
 
     def update_plot(self, display_audio: bool = True) -> None:
         plt.draw()
         self.synthesize()
         if display_audio:
             ipd.display(self.audio_widget)
-
-
