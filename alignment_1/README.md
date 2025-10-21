@@ -27,26 +27,26 @@ The deadline for the complete report is on **January 21st, 2026 23:59**.
 
 We will grade each task on 4(+1) main aspects:
 
-1. **Technical correctness (methods/models)**: 25% (12.5 points)
+1. **Technical correctness (methods/models)**: 25%
     * Methods are appropriate for the problem
     * Methods were correctly applied/used
     * Implementation is correct
 
-2. **Technical correctness (Evaluation)**: 25% (12.5 points)
+2. **Technical correctness (Evaluation)**: 25%
     * An evaluation was conducted
     * Correct use of metrics/statistics
     * There is no data leak (correct split of the data), if the models are trained
 
-3. **Presentation style** (structure, clarity): 40% (20 points)
+3. **Presentation style** (structure, clarity): 40% 
     * Ideally, the report should not be only text or code, but it also should include some figures/images illustrating the methods. Imagine that you are writing a blog post for **non-experts**, and try to explain the methods in a simple and clear way, and do not be afraid to use some math! (You can use LaTeX/Markdown on Jupyter Notebooks)
     * Is the report reasonably structured into sections? (e.g., Introduction, Methods, Datasets, etc.)
     * Are the figures illustrating the results?
     * Are the citations correctly formatted,…
 
-4. **Critical reflection**: 10% (5 points)
+4. **Critical reflection**: 10% 
     * What are the limitations of the approach, what did you learn?
 
-5. **(Bonus) Creativity**: (up to 30%/ up to 15 points)
+5. **(Bonus) Creativity**: (up to 30%)
     * You can get extra points for creative solutions! Don’t be afraid to think outside the box, even if the results do not outperform other methods!
 
 The report for each task must include the following points (you can structure the report in any way you want, as long as these points are covered):
