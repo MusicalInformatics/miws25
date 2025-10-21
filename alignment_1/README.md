@@ -6,24 +6,24 @@ To run the baseline submission for the challenge, run the following commands on 
 
 ```bash
 cd PATH_TO_THE_REPO
-cd alignment
+cd alignment_1
 conda activate miws25
 python Baseline_Alignment.py -c -i PATH_TO_DATASET -o PATH_FOR_THE_OUTPUT
 ```
 
-This will generate a compressed numpy file with the results. Please upload this file in the challenge server, which is located [here](https://challenges.cp.jku.at/challenge/21/).
+This will generate a compressed numpy file with the results. Please upload this file in the challenge server, which is located [here](https://challenges.cp.jku.at/challenge/30/) (you need credentials to access the repository).
 
 ## Score-to-Performance Alignment Task
 
-This task is worth 50 points.
+This task is worth 100 points.
 
 ### Report
 
-For this task, you are required to work in teams (you can select a team on the Moodle page) of up to 3 people. Teams of 1 person are allowed, but you have to select one of the (empty) teams on Moodle. Otherwise, you will **not** be allowed to submit your report!
+For this task, you are required to work in teams (you can select a team on the Moodle page) of up to 4 people. Teams of 1 person are allowed, but you have to select one of the (empty) teams on Moodle. Otherwise, you will **not** be allowed to submit your report!
 
 For the project you will have to submit a report in the form of a blog post-like Jupyter Notebook.  The task will be graded based on the submitted report.
 
-The deadline for the complete report is on **January 22nd, 2024 23:59**.
+The deadline for the complete report is on **January 21st, 2026 23:59**.
 
 We will grade each task on 4(+1) main aspects:
 
@@ -72,7 +72,7 @@ The report for each task must include the following points (you can structure th
 
 ### Challenge
 
-Each team should participate at **least once** in the challenge to get a grade in the reports. The deadline for submissions is **January 21st, 2025 23:59**! The winners of the challenge will be announced during the final concert/presentations on **January 22nd**.
+Each team should participate at **least once** in the challenge to get a grade in the reports. The deadline for submissions is **January 20st, 2026 23:59**! The winners of the challenge will be announced during the final concert/presentations on **January 21nd**.
 
 For this challenge, you will have to align a performance with its score, in a note-wise fashion and export your results as a compressed Numpy file. For convenience, we will provide both a training dataset consisting of performance, score and ground truth alignments in the CSV format used for [Parangonada](https://sildater.github.io/parangonada/), an interactive interface to compare and correct alignments.
 
@@ -88,6 +88,6 @@ For the challenge, your script submission should be executed in the following wa
 python TeamName_Alignment.py -c -i path_to_the_data_directory -o output_directory
 ```
 
-The file `TeamName_Alignment.py` should be as self-contained as possible and you can use third-party libraries that are not included in the conda environment for the course. You can use the methods defined in the class (and  available on the [GitHub repository](https://github.com/MusicalInformatics/miws2024/tree/main)). Please upload a zip file with all of the files to run your submission, including the python script itself, the conda environment yaml file, any other helper files and trained model weights (if relevant) and a `README.md` file indicating how to setup and run the code.
+The file `TeamName_Alignment.py` should be as self-contained as possible and you can use third-party libraries that are not included in the conda environment for the course. You can use the methods defined in the class (and  available on the [GitHub repository](https://github.com/MusicalInformatics/miws25/tree/main)). Please upload a zip file with all of the files to run your submission, including the python script itself, the conda environment yaml file, any other helper files and trained model weights (if relevant) and a `README.md` file indicating how to setup and run the code.
 
 Please follow the example in `Baseline_Alignment.py` in the `alignment` folder in the GitHub repository.
