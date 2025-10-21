@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Baseline submission for the music alignment challenge
-for Musical Informatics WS24
+for Musical Informatics WS25
 """
 import warnings
 import shutil
