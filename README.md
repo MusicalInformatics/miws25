@@ -57,6 +57,69 @@ To activate the environment in the terminal:
 conda activate miws25
 ```
 
+### Known Issues Setting up the environment
+
+#### Issues setting up Partitura
+
+If your environment has issues setting up Partitura, you should install the package directly from the source:
+
+```bash
+# Activate the miws environment
+conda activate miws25
+
+# Clone the repository
+git clone https://github.com/CPJKU/partitura.git
+cd partitura
+
+# Install partitura in development mode
+pip install -e .
+```
+#### Issues with Portaudio
+
+If you have an error message like this, you might need to install portaudio.
+
+```bash
+issue when installing pip dependencies: src/pyaudio/device_api.c:9:10: fatal error: portaudio.h: No such file or directory
+          9 | #include "portaudio.h"
+            |          ^~~~~~~~~~~~~
+      compilation terminated.
+      error: command '/usr/bin/gcc' failed with exit code 1
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  ERROR: Failed building wheel for pyaudio
+error: failed-wheel-build-for-install
+× Failed to build installable wheels for some pyproject.toml based projects
+╰─> pyaudio
+failed
+CondaEnvException: Pip failed
+```
+
+ You can do this as follows:
+
+* Linux: `sudo apt-get install portaudio19-dev`
+* Mac: `brew install portaudio`
+
+#### Issues installing Fluidsynth
+
+The python library `pyfluidsynth` requires a working installation of Fluidsynth. On MacOS and Linux, we recommend to use `conda` to install fluidsynth.
+
+```bash
+conda install -c conda-forge fluidsynth
+```
+This will install the Fluidsynth library itselt (the C-based command line tool), not the python bindings (`pyfluidsynth`). 
+
+##### Issues with Fluidsynth and pyfluidsynth on Windows
+
+On Windows, pyfluidsynth expects fluidsynth.exe to be located in `C:\tools\bin` (other users have reported that it is expected in `C:\tools\fluidsynth\bin`). You can fix the issue by
+
+1. Get the ZIP file for your Windows version from <https://github.com/FluidSynth/fluidsynth/releases/latest>
+2. Extract the contents to `C:\tools` (or wherever pyfluidsynth expects the executable to be).
+
+##### Using Fluidsynth installed from Homebrew on MacOS
+
+We recommend to install Fluidsynth from conda in a dedicated environemnt. If however, you want to use the system-wide Fluidsynth installed with homebrew, you might run into an `ImportError("Couldn't find the FluidSynth library.")` with `pyfluidsynth`.  Please refer to the following [link](https://stackoverflow.com/a/75339618).
+
 ## Lecturers
 
 - Carlos Cancino-Chacón: [carlos.cancino_chacon@jku.at](mailto:carlos.cancino_chacon@jku.at)
