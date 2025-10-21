@@ -225,10 +225,11 @@ Icon?
 .Trashes
 .fseventsd
 
-alignment_1/
 alignment_2/
 classification/
 expectation/
 generation_dl/
 generation_EA/
 expressive_rendering/
+alignment_1/output/
+alignment_1/Dataset*/
