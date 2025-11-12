@@ -226,7 +226,9 @@ Icon?
 .fseventsd
 
 alignment_2/
-classification/
+classification/datasets/
+clasification/pickled*
+classification/*.pth
 expectation/
 generation_dl/
 generation_EA/
