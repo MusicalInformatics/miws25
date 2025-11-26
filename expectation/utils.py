@@ -19,7 +19,7 @@ except:
 HOME_DIR = "."
 
 if IN_COLAB:
-    HOME_DIR = "/content/miws2024/expectation"
+    HOME_DIR = "/content/miws25/expectation"
 
 warnings.filterwarnings("ignore")
 
