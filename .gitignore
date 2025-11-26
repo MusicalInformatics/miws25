@@ -229,9 +229,12 @@ alignment_2/
 classification/datasets/
 clasification/pickled*
 classification/*.pth
-expectation/
+expectation/*.pth
 generation_dl/
 generation_EA/
 expressive_rendering/
 alignment_1/output/
 alignment_1/Dataset*/
+expectation/data/MNIST/
+expectation/train_loss.txt
+expectation/valid_loss.txt
