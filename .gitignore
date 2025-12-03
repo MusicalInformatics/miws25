@@ -241,3 +241,4 @@ introduction/CatPerformance.mid
 introduction/CatScore.musicxml
 classification/baseline_submission_key_estimation.csv
 .vscode
+expressive_rendering/my_midi_output.mid

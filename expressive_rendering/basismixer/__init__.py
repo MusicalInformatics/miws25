@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 The top level of the package contains functions to extract score information
 with basis functions and create performance codecs

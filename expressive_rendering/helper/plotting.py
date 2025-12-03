@@ -36,6 +36,8 @@ def plot_basis(basis, names, onsets=None, title=None):
     if title:
         fig.subplots_adjust(top=0.95)
 
+    plt.show()
+
     # fig.savefig(out_fn)
 
 
