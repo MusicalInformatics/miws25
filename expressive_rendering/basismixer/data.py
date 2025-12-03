@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 import logging
 import os
 
@@ -364,103 +364,6 @@ def make_datasets(
     return piece_data_to_datasets(data, bf_idx_map, model_specs)
 
 
-# def make_datasets(
-#     model_specs,
-#     root_folder,
-#     dataset_name,
-#     gracenotes="remove",
-#     valid_pieces=None,
-# ):
-#     # assert dataset_name in ["4x22", "magaloff", "asap"]
-
-#     # quirks = dataset_name == "magaloff"
-
-#     with warnings.catch_warnings():
-#         warnings.simplefilter("ignore")
-#         all_targets = list(
-#             set(
-#                 [n for model_spec in model_specs for n in model_spec["parameter_names"]]
-#             )
-#         )
-
-#         perf_codec = get_performance_codec(all_targets)
-
-#         bf_idx_map = {}
-
-#         all_basis_functions = set(
-#             [n for model_spec in model_specs for n in model_spec["basis_functions"]]
-#         )
-
-#         if dataset_name == "asap":  # todo: fix loading of Liszt/Sonata
-#             assert (
-#                 "asap" in root_folder.split("/")[-1]
-#             ), 'Root folder name must contain "asap"'
-#             pieces = list(Path(root_folder).rglob("*/xml_score.musicxml"))
-#             pieces = filter_blocklist(pieces)
-#             performances = [
-#                 list(Path(piece).parent.glob("*_note_alignments/note_alignment.tsv"))
-#                 for piece in pieces
-#             ]
-#             piece_performances = zip(pieces, performances)
-#         else:
-#             mxml_folder = os.path.join(
-#                 root_folder,
-#                 "xml" if dataset_name == "magaloff" else "musicxml",
-#             )
-#             match_folder = os.path.join(root_folder, "match")
-#             folders = dict(mxml=mxml_folder, match=match_folder)
-#             paired_files = pair_files(folders, by_prefix=not quirks)
-#             piece_performances = (
-#                 []
-#             )  # [(pf['mxml'][0], list(pf['match'])) for pf in paired_files]
-
-#             if valid_pieces is None:
-#                 valid_pieces = np.array(list(paired_files.keys()))
-#             for pf in paired_files.items():
-#                 if pf[0] not in valid_pieces:
-#                     print(f"{pf[0]} is not in valid_pieces")
-#                     continue
-
-#                 if "chopin_op35_Mv3" in pf[0]:  # todo: repair loading, do not filter...
-#                     continue
-#                 piece_performances.append(
-#                     (list(pf[1]["mxml"])[0], list(pf[1]["match"]))
-#                 )
-
-#         N_PROC = 1
-#         pool = Pool(N_PROC)
-#         if N_PROC > 1:
-#             pieces = list(
-#                 pool.map(
-#                     ProcessPiece(
-#                         (root_folder, perf_codec, all_basis_functions, gracenotes)
-#                     ),
-#                     piece_performances,
-#                 )
-#             )
-#         else:
-#             pieces = [
-#                 process_piece(
-#                     p, perf_codec, all_basis_functions, gracenotes, dataset_name
-#                 )
-#                 for p in piece_performances
-#             ]
-#         pieces = [list(i) for sublist in pieces for i in sublist]
-
-#         for piece in pieces:
-#             bf_idx = np.array(
-#                 [
-#                     bf_idx_map.setdefault(name, len(bf_idx_map))
-#                     for i, name in enumerate(piece[1])
-#                 ]
-#             )
-#             piece[1] = bf_idx
-
-#         data = [tuple(l) for l in pieces]
-
-#         return piece_data_to_datasets(data, bf_idx_map, model_specs)
-
-
 def piece_data_to_datasets(data, bf_idx_map, model_specs):
     # total number of basis functions in the dataset
     # n_basis = len(bf_idx_map)
@@ -487,7 +390,6 @@ def piece_data_to_datasets(data, bf_idx_map, model_specs):
 
         m_datasets = []
         m_input_names = []
-        
 
         for bf, idx, targets, uox, perf_name in data:
             # idx: the global indices that this piece has

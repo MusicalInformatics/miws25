@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
 import sys
 import logging
+from typing import List, Tuple
 import numpy as np
 import partitura.utils
 from scipy.interpolate import interp1d
@@ -25,10 +26,12 @@ def print_basis_functions():
     module = sys.modules[__name__]
     doc_indent = 4
     for name in list_basis_functions():
-        print('* {}'.format(name))
+        print("* {}".format(name))
         member = getattr(sys.modules[__name__], name)
         if member.__doc__:
-            print(' ' * doc_indent + member.__doc__.replace('\n', ' ' * doc_indent + '\n'))
+            print(
+                " " * doc_indent + member.__doc__.replace("\n", " " * doc_indent + "\n")
+            )
 
 
 def list_basis_functions():
@@ -47,17 +50,20 @@ def list_basis_functions():
     """
     module = sys.modules[__name__]
     bfs = []
-    exclude = {'make_basis'}
+    exclude = {"make_basis"}
     for name in dir(module):
         if name in exclude:
             continue
         member = getattr(sys.modules[__name__], name)
-        if isinstance(member, types.FunctionType) and name.endswith('_basis'):
+        if isinstance(member, types.FunctionType) and name.endswith("_basis"):
             bfs.append(name)
     return bfs
 
 
-def make_basis(part, basis_functions):
+def make_basis(
+    part: score.Part,
+    basis_functions: list,
+) -> Tuple[np.ndarray, List[str]]:
     """Compute the specified basis functions for a part.
 
     The function returns the computed basis functions as a N x M
@@ -89,9 +95,9 @@ def make_basis(part, basis_functions):
         The basis functions
     names : list
         The basis names
-    
+
     """
-    
+
     acc = []
 
     for bf in basis_functions:
@@ -102,29 +108,35 @@ def make_basis(part, basis_functions):
         elif isinstance(bf, types.FunctionType):
             func = bf
         else:
-            LOGGER.warning('Ignoring unknown basis function {}'.format(bf))
+            LOGGER.warning("Ignoring unknown basis function {}".format(bf))
 
         bf, bn = func(part)
 
         # check if the size and number of the basis function are correct
         if bf.shape[1] != len(bn):
-            msg = ('number of basis names {} does not equal '
-                   'number of basis {}'.format(len(bn), bf.shape[1]))
+            msg = (
+                "number of basis names {} does not equal "
+                "number of basis {}".format(len(bn), bf.shape[1])
+            )
             raise InvalidBasisException(msg)
         n_notes = len(part.notes_tied)
         if len(bf) != n_notes:
-            msg = ('length of basis {} does not equal '
-                   'number of notes {}'.format(len(bf), n_notes))
+            msg = "length of basis {} does not equal " "number of notes {}".format(
+                len(bf), n_notes
+            )
             raise InvalidBasisException(msg)
 
         if np.any(np.logical_or(np.isnan(bf), np.isinf(bf))):
-            problematic = np.unique(np.where(np.logical_or(np.isnan(bf), np.isinf(bf)))[1])
-            msg = ('NaNs or Infs found in the following basis: {} '
-                   .format(', '.join(np.array(bn)[problematic])))
+            problematic = np.unique(
+                np.where(np.logical_or(np.isnan(bf), np.isinf(bf)))[1]
+            )
+            msg = "NaNs or Infs found in the following basis: {} ".format(
+                ", ".join(np.array(bn)[problematic])
+            )
             raise InvalidBasisException(msg)
-        
+
         # prefix basis names by function name
-        bn = ['{}.{}'.format(func.__name__, n) for n in bn]
+        bn = ["{}.{}".format(func.__name__, n) for n in bn]
 
         acc.append((bf, bn))
 
@@ -134,27 +146,27 @@ def make_basis(part, basis_functions):
     return basis_data, basis_names
 
 
-def polynomial_pitch_basis(part):
+def polynomial_pitch_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Polynomial pitch basis.
 
     Returns:
     * pitch : the midi pitch of the note
     * pitch^2 : the square of the midi pitch
     * pitch^3 : the power of 3 of the midi pitch
-    
+
     """
 
-    basis_names = ['pitch', 'pitch^2', 'pitch^3']
+    basis_names = ["pitch", "pitch^2", "pitch^3"]
     max_pitch = 127
     pitches = ensure_notearray(part)["pitch"].astype(float)
-    W = np.column_stack((pitches / max_pitch,
-                         pitches**2 / max_pitch**2,
-                         pitches**3 / max_pitch**3))
+    W = np.column_stack(
+        (pitches / max_pitch, pitches**2 / max_pitch**2, pitches**3 / max_pitch**3)
+    )
 
     return W, basis_names
 
 
-def duration_basis(part):
+def duration_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Duration basis.
 
     Returns:
@@ -162,7 +174,7 @@ def duration_basis(part):
 
     """
 
-    basis_names = ['duration']
+    basis_names = ["duration"]
 
     nd = np.array([(n.start.t, n.end_tied.t) for n in part.notes_tied])
     bm = part.beat_map
@@ -172,49 +184,53 @@ def duration_basis(part):
     W.shape = (-1, 1)
     return W, basis_names
 
-def onset_basis(part):
+
+def onset_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Onset basis
-    
+
     Returns:
     * onset : the onset of the note in beats
     * score_position : position of the note in the score between 0 (the beginning of the piece) and 1 (the end of the piece)
-    
+
     TODO:
     * rel_position_repetition
     """
-    basis_names = ['onset', 'score_position']
+    basis_names = ["onset", "score_position"]
 
     onsets_beat = ensure_notearray(part)["onset_beat"]
-    rel_position = normalize(onsets_beat, method='minmax')
+    rel_position = normalize(onsets_beat, method="minmax")
 
     W = np.column_stack((onsets_beat, rel_position))
 
     return W, basis_names
 
-def relative_score_position_basis(part):
+
+def relative_score_position_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     W, names = onset_basis(part)
     return W[:, 1:], names[1:]
 
 
-def grace_basis(part):
+def grace_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Grace basis.
 
     Returns:
     * grace_note : 1 when the note is a grace note, 0 otherwise
-    * n_grace : the length of the grace note sequence to which 
+    * n_grace : the length of the grace note sequence to which
                 this note belongs (0 for non-grace notes)
-    * grace_pos : the (1-based) position of the grace note in 
+    * grace_pos : the (1-based) position of the grace note in
                   the sequence (0 for non-grace notes)
 
     """
 
-    basis_names = ['grace_note', 'n_grace', 'grace_pos']
+    basis_names = ["grace_note", "n_grace", "grace_pos"]
 
     notes = ensure_notearray(part)
     W = np.zeros((len(notes), 3))
     for i, n in enumerate(notes):
         if n["duration_beat"] == 0:
-            n_grace = np.where((notes["onset_beat"] == n["onset_beat"]) & (notes["duration_beat"]==0))[0].shape[0]
+            n_grace = np.where(
+                (notes["onset_beat"] == n["onset_beat"]) & (notes["duration_beat"] == 0)
+            )[0].shape[0]
             # or
             # n_grace = np.nonzero(ensure_notearray(part, include_grace_notes=True)["is_grace"])
             W[i, 0] = 1
@@ -224,7 +240,7 @@ def grace_basis(part):
     return W, basis_names
 
 
-def loudness_direction_basis(part):
+def loudness_direction_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """The loudness directions in part.
 
     This function returns a varying number of descriptors, depending
@@ -232,21 +248,20 @@ def loudness_direction_basis(part):
     together. For example 'decrescendo' and 'diminuendo' are encoded
     together in a descriptor 'loudness_decr'. The descriptor names of
     textual directions such as 'adagio' are the verbatim directions.
-    
+
     Some possible descriptors:
     * p : piano
     * f : forte
     * pp : pianissimo
     * loudness_incr : crescendo direction
     * loudness_decr : decrescendo or diminuendo direction
-    
+
     """
 
     onsets = ensure_notearray(part)["onset_div"]
     N = len(onsets)
 
-    directions = list(part.iter_all(
-        score.LoudnessDirection, include_subclasses=True))
+    directions = list(part.iter_all(score.LoudnessDirection, include_subclasses=True))
 
     def to_name(d):
         if isinstance(d, score.ConstantLoudnessDirection):
@@ -254,14 +269,13 @@ def loudness_direction_basis(part):
         elif isinstance(d, score.ImpulsiveLoudnessDirection):
             return d.text
         elif isinstance(d, score.IncreasingLoudnessDirection):
-            return 'loudness_incr'
+            return "loudness_incr"
         elif isinstance(d, score.DecreasingLoudnessDirection):
-            return 'loudness_decr'
+            return "loudness_decr"
 
     basis_by_name = {}
     for d in directions:
-        j, bf = basis_by_name.setdefault(to_name(d),
-                                         (len(basis_by_name), np.zeros(N)))
+        j, bf = basis_by_name.setdefault(to_name(d), (len(basis_by_name), np.zeros(N)))
         bf += basis_function_activation(d)(onsets)
 
     W = np.empty((len(onsets), len(basis_by_name)))
@@ -273,14 +287,14 @@ def loudness_direction_basis(part):
     return W, names
 
 
-def tempo_direction_basis(part):
+def tempo_direction_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """The tempo directions in part.
 
     This function returns a varying number of descriptors, depending
     on which directions are present. Some directions are grouped
     together. For example 'adagio' and 'molto adagio' are encoded
     together in a descriptor 'adagio'.
-    
+
     Some possible descriptors:
     * adagio : directions like 'adagio', 'molto adagio'
 
@@ -288,8 +302,7 @@ def tempo_direction_basis(part):
     onsets = ensure_notearray(part)["onset_div"]
     N = len(onsets)
 
-    directions = list(part.iter_all(
-        score.TempoDirection, include_subclasses=True))
+    directions = list(part.iter_all(score.TempoDirection, include_subclasses=True))
 
     def to_name(d):
         if isinstance(d, score.ResetTempoDirection):
@@ -301,14 +314,13 @@ def tempo_direction_basis(part):
         elif isinstance(d, score.ConstantTempoDirection):
             return d.text
         elif isinstance(d, score.IncreasingTempoDirection):
-            return 'tempo_incr'
+            return "tempo_incr"
         elif isinstance(d, score.DecreasingTempoDirection):
-            return 'tempo_decr'
+            return "tempo_decr"
 
     basis_by_name = {}
     for d in directions:
-        j, bf = basis_by_name.setdefault(to_name(d),
-                                         (len(basis_by_name), np.zeros(N)))
+        j, bf = basis_by_name.setdefault(to_name(d), (len(basis_by_name), np.zeros(N)))
         bf += basis_function_activation(d)(onsets)
 
     W = np.empty((len(onsets), len(basis_by_name)))
@@ -320,14 +332,14 @@ def tempo_direction_basis(part):
     return W, names
 
 
-def articulation_direction_basis(part):
-    """
-    """
+def articulation_direction_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
+    """ """
     onsets = ensure_notearray(part)["onset_div"]
     N = len(onsets)
 
-    directions = list(part.iter_all(
-        score.ArticulationDirection, include_subclasses=True))
+    directions = list(
+        part.iter_all(score.ArticulationDirection, include_subclasses=True)
+    )
 
     def to_name(d):
         return d.text
@@ -336,8 +348,7 @@ def articulation_direction_basis(part):
 
     for d in directions:
 
-        j, bf = basis_by_name.setdefault(to_name(d),
-                                         (len(basis_by_name), np.zeros(N)))
+        j, bf = basis_by_name.setdefault(to_name(d), (len(basis_by_name), np.zeros(N)))
         bf += basis_function_activation(d)(onsets)
 
     W = np.empty((len(onsets), len(basis_by_name)))
@@ -351,11 +362,12 @@ def articulation_direction_basis(part):
     return W, names
 
 
-def basis_function_activation(direction):
+def basis_function_activation(direction: score.Part) -> Tuple[np.ndarray, List[str]]:
     epsilon = 1e-6
 
-    if isinstance(direction, (score.DynamicLoudnessDirection,
-                              score.DynamicTempoDirection)):
+    if isinstance(
+        direction, (score.DynamicLoudnessDirection, score.DynamicTempoDirection)
+    ):
         # a dynamic direction will be encoded as a ramp from d.start.t to
         # d.end.t, and then a step from d.end.t to the start of the next
         # constant direction.
@@ -375,14 +387,17 @@ def basis_function_activation(direction):
                 direction_end = direction.start.t
 
         if isinstance(direction, score.TempoDirection):
-            next_dir = next(direction.start.iter_next(
-                score.ConstantTempoDirection), None)
+            next_dir = next(
+                direction.start.iter_next(score.ConstantTempoDirection), None
+            )
         if isinstance(direction, score.ArticulationDirection):
-            next_dir = next(direction.start.iter_next(
-                score.ConstantArticulationDirection), None)
+            next_dir = next(
+                direction.start.iter_next(score.ConstantArticulationDirection), None
+            )
         else:
-            next_dir = next(direction.start.iter_next(
-                score.ConstantLoudnessDirection), None)
+            next_dir = next(
+                direction.start.iter_next(score.ConstantLoudnessDirection), None
+            )
 
         if next_dir:
             # TODO: what do we do when next_dir is too far away?
@@ -392,40 +407,47 @@ def basis_function_activation(direction):
             # basis function will be a ramp with a quarter note ramp
             sustained_end = direction_end + direction.start.quarter
 
-        x = [direction.start.t,
-             direction_end - epsilon,
-             sustained_end - epsilon]
+        x = [direction.start.t, direction_end - epsilon, sustained_end - epsilon]
         y = [0, 1, 1]
 
-    elif isinstance(direction, (score.ConstantLoudnessDirection,
-                                score.ConstantArticulationDirection,
-                                score.ConstantTempoDirection)):
-        x = [direction.start.t - epsilon,
-             direction.start.t,
-             direction.end.t - epsilon,
-             direction.end.t]
+    elif isinstance(
+        direction,
+        (
+            score.ConstantLoudnessDirection,
+            score.ConstantArticulationDirection,
+            score.ConstantTempoDirection,
+        ),
+    ):
+        x = [
+            direction.start.t - epsilon,
+            direction.start.t,
+            direction.end.t - epsilon,
+            direction.end.t,
+        ]
         y = [0, 1, 1, 0]
 
     else:  # impulsive
-        x = [direction.start.t - epsilon,
-             direction.start.t,
-             direction.start.t + epsilon]
+        x = [
+            direction.start.t - epsilon,
+            direction.start.t,
+            direction.start.t + epsilon,
+        ]
         y = [0, 1, 0]
 
     return interp1d(x, y, bounds_error=False, fill_value=0)
 
 
-def slur_basis(part):
+def slur_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Slur basis.
 
     Returns:
-    * slur_incr : a ramp function that increases from 0 
+    * slur_incr : a ramp function that increases from 0
                   to 1 over the course of the slur
-    * slur_decr : a ramp function that decreases from 1 
+    * slur_decr : a ramp function that decreases from 1
                   to 0 over the course of the slur
 
     """
-    names = ['slur_incr', 'slur_decr']
+    names = ["slur_incr", "slur_decr"]
     onsets = ensure_notearray(part)["onset_div"]
     slurs = part.iter_all(score.Slur)
     W = np.zeros((len(onsets), 2))
@@ -442,7 +464,7 @@ def slur_basis(part):
     return W, names
 
 
-def articulation_basis(part):
+def articulation_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Articulation basis.
 
     This basis returns articulation-related note annotations, such as accents, legato, and tenuto.
@@ -454,10 +476,24 @@ def articulation_basis(part):
     ...
 
     """
-    names = ['accent', 'strong-accent', 'staccato', 'tenuto',
-             'detached-legato', 'staccatissimo', 'spiccato',
-             'scoop', 'plop', 'doit', 'falloff', 'breath-mark',
-             'caesura', 'stress', 'unstress', 'soft-accent']
+    names = [
+        "accent",
+        "strong-accent",
+        "staccato",
+        "tenuto",
+        "detached-legato",
+        "staccatissimo",
+        "spiccato",
+        "scoop",
+        "plop",
+        "doit",
+        "falloff",
+        "breath-mark",
+        "caesura",
+        "stress",
+        "unstress",
+        "soft-accent",
+    ]
     basis_by_name = {}
     notes = part.notes_tied
     N = len(notes)
@@ -466,8 +502,8 @@ def articulation_basis(part):
             for art in n.articulations:
                 if art in names:
                     j, bf = basis_by_name.setdefault(
-                        art,
-                        (len(basis_by_name), np.zeros(N)))
+                        art, (len(basis_by_name), np.zeros(N))
+                    )
                     bf[i] = 1
 
     M = len(basis_by_name)
@@ -480,6 +516,7 @@ def articulation_basis(part):
 
     return W, names
 
+
 # # for a subset of the articulations do e.g.
 # def staccato_basis(part):
 #     W, names = articulation_basis(part)
@@ -490,14 +527,14 @@ def articulation_basis(part):
 #         return np.empty(len(W)), []
 
 
-def fermata_basis(part):
+def fermata_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Fermata basis.
 
     Returns:
     * fermata : 1 when the note coincides with a fermata sign.
 
     """
-    names = ['fermata']
+    names = ["fermata"]
     onsets = ensure_notearray(part)["onset_div"]
     W = np.zeros((len(onsets), 1))
     for ferm in part.iter_all(score.Fermata):
@@ -505,7 +542,7 @@ def fermata_basis(part):
     return W, names
 
 
-def metrical_basis(part):
+def metrical_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Metrical basis
 
     This basis encodes the metrical position in the bar. For example
@@ -515,7 +552,7 @@ def metrical_basis(part):
     are encoded in a basis suffixed '_weak'. For example a note
     starting on the second 8th note in a bar of 4/4 meter will have a
     non-zero value in the 'metrical_4_4_weak' descriptor.
-    
+
     """
     notes = part.notes_tied
     ts_map = part.time_signature_map
@@ -537,12 +574,13 @@ def metrical_basis(part):
         pos = bm(n.start.t) - bm(measure_start)
 
         if pos % 1 < eps:
-            name = 'metrical_{}_{}_{}'.format(beats, beat_type, int(pos))
+            name = "metrical_{}_{}_{}".format(beats, beat_type, int(pos))
         else:
-            name = 'metrical_{}_{}_weak'.format(beats, beat_type)
+            name = "metrical_{}_{}_weak".format(beats, beat_type)
 
-        j, bf = basis_by_name.setdefault(name,
-                                         (len(basis_by_name), np.zeros(len(notes))))
+        j, bf = basis_by_name.setdefault(
+            name, (len(basis_by_name), np.zeros(len(notes)))
+        )
         bf[i] = 1
 
     W = np.empty((len(notes), len(basis_by_name)))
@@ -553,7 +591,8 @@ def metrical_basis(part):
 
     return W, names
 
-def metrical_strength_basis(part):
+
+def metrical_strength_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Metrical strength basis
 
     This basis encodes the beat phase (relative position of a note within
@@ -563,11 +602,13 @@ def metrical_strength_basis(part):
     ts_map = part.time_signature_map
     bm = part.beat_map
 
-    names = ['beat_phase',
-             'metrical_strength_downbeat',
-             'metrical_strength_secondary',
-             'metrical_strength_weak']
-    
+    names = [
+        "beat_phase",
+        "metrical_strength_downbeat",
+        "metrical_strength_secondary",
+        "metrical_strength_weak",
+    ]
+
     W = np.zeros((len(notes), len(names)))
     for i, n in enumerate(notes):
 
@@ -596,7 +637,7 @@ def metrical_strength_basis(part):
         m_pos = np.mod(pos, beats)
 
         W[i, 0] = m_pos / beats
-        
+
         if m_pos == 0:
             W[i, 1] = 1
         elif m_pos == sec_beat:
@@ -606,7 +647,8 @@ def metrical_strength_basis(part):
 
     return W, names
 
-def time_signature_basis(part):
+
+def time_signature_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """TIme Signature basis
     This basis encodes the time signature of the note in two sets of one-hot vectors,
     a one hot encoding of number of beats and a one hot encoding of beat type
@@ -614,14 +656,15 @@ def time_signature_basis(part):
 
     notes = ensure_notearray(part)
     ts_map = part.time_signature_map
-    possible_beats = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 'other']
-    possible_beat_types = [1, 2, 4, 8, 16, 'other']
+    possible_beats = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, "other"]
+    possible_beat_types = [1, 2, 4, 8, 16, "other"]
     W_beats = np.zeros((len(notes), len(possible_beats)))
     W_types = np.zeros((len(notes), len(possible_beat_types)))
 
-    names = (['time_signature_num_{0}'.format(b) for b in possible_beats] +
-             ['time_signature_den_{0}'.format(b) for b in possible_beat_types])
-    
+    names = ["time_signature_num_{0}".format(b) for b in possible_beats] + [
+        "time_signature_den_{0}".format(b) for b in possible_beat_types
+    ]
+
     for i, n in enumerate(notes):
         beats, beat_type = ts_map(n["onset_div"]).astype(int)
 
@@ -640,7 +683,7 @@ def time_signature_basis(part):
     return W, names
 
 
-def vertical_neighbor_basis(part):
+def vertical_neighbor_basis(part: score.Part) -> Tuple[np.ndarray, List[str]]:
     """Vertical neighbor basis.
 
     Describes various aspects of simultaneously starting notes.
@@ -651,12 +694,18 @@ def vertical_neighbor_basis(part):
     * n_below :
     * highest_pitch :
     * lowest_pitch :
-    * pitch_range : 
+    * pitch_range :
 
     """
     # the list of descriptors
-    names = ['n_total', 'n_above', 'n_below',
-             'highest_pitch', 'lowest_pitch', 'pitch_range']
+    names = [
+        "n_total",
+        "n_above",
+        "n_below",
+        "highest_pitch",
+        "lowest_pitch",
+        "pitch_range",
+    ]
     # notes
     notes = ensure_notearray(part)
 
@@ -674,7 +723,7 @@ def vertical_neighbor_basis(part):
     return W, names
 
 
-def normalize(data, method='minmax'):
+def normalize(data: np.ndarray, method: str = "minmax") -> np.ndarray:
     """
     Normalize data in one of several ways.
 
@@ -715,7 +764,7 @@ def normalize(data, method='minmax'):
     """Normalize the data in `data`. There are several normalization
     
     """
-    if method == 'minmax':
+    if method == "minmax":
         vmin = np.min(data, 0)
         vmax = np.max(data, 0)
 
@@ -724,7 +773,7 @@ def normalize(data, method='minmax'):
             return np.zeros_like(data)
         else:
             return (data - vmin) / (vmax - vmin)
-    elif method == 'tanh':
+    elif method == "tanh":
         return np.tanh(data)
-    elif method == 'tanh_unity':
+    elif method == "tanh_unity":
         return np.tanh(data) / np.tanh(1)
