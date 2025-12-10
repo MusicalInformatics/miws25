@@ -230,7 +230,8 @@ classification/datasets/
 clasification/pickled*
 classification/*.pth
 expectation/*.pth
-generation_dl/
+generation_dl/*/checkpoint*.pth
+generation_dl/*/GeneratedDrumBeat*.mid
 generation_EA/
 alignment_1/output/
 alignment_1/Dataset*/
