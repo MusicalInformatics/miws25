@@ -231,7 +231,7 @@ classification/*.pth
 expectation/*.pth
 generation_dl/*/checkpoint*.pth
 generation_dl/*/GeneratedDrumBeat*.mid
-generation_EA/
+generation_EA/evolutionary_four_part_writing.musicxml
 alignment_1/output/
 alignment_1/Dataset*/
 expectation/data/MNIST/
